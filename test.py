@@ -27,4 +27,3 @@ for key in data:
   time.sleep(1) # separate points by 1 second
 
 print("Complete. Return to the InfluxDB UI.")
-print("Daniel Stinkt")

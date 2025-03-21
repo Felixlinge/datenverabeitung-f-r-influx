@@ -48,7 +48,7 @@ try:
     # Variable ausgang auslesen
     while True:
         print('Wert der Variable ausgang ', ausgang.get_value())
-
+        print("Daniel Stinkt")
         point = (
             Point("census")
             .field("grad",ausgang.get_value())

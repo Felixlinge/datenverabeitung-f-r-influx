@@ -1,73 +1,53 @@
-import pygame
-import sys
-import ctypes
+import tkinter as tk
 
-def main():
-    pygame.init()
+# Fensterabmessungen
+WIDTH, HEIGHT = 300, 100
+dx, dy = 5, 5  # Geschwindigkeiten für x und y
+
+def move_window():
+    global dx, dy
     
-    # Fenstergröße
-    WIDTH, HEIGHT = 300, 100
+    x = root.winfo_x()
+    y = root.winfo_y()
     
-    # Pygame-Fenster erstellen
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Bewegendes Fenster mit Text")
+    # Bildschirm-Auflösung
+    screen_w = root.winfo_screenwidth()
+    screen_h = root.winfo_screenheight()
 
-    # Erzeuge Schriftart und Text
-    font = pygame.font.SysFont(None, 58)  # Standard-Schrift, Größe 48
-    text_surface = font.render("Daniel", True, (255, 255, 255))
-    text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    # Kollision links/rechts
+    if x + dx < 0 or x + WIDTH + dx > screen_w:
+        dx = -dx
 
-    # Windows-spezifischer Handle des Fensters
-    hwnd = pygame.display.get_wm_info()["window"]
+    # Kollision oben/unten
+    if y + dy < 0 or y + HEIGHT + dy > screen_h:
+        dy = -dy
+
+    # Neue Position
+    x += dx
+    y += dy
     
-    # Startposition des Fensters (Pixelkoordinaten)
-    x = 100
-    y = 100
-    
-    # Geschwindigkeit für x- und y-Richtung
-    speed_x = 3
-    speed_y = 3
-    
-    # Bildschirm-Auflösung ermitteln, um Rand-Kollisionen zu erkennen
-    user32 = ctypes.windll.user32
-    screen_width = user32.GetSystemMetrics(0)
-    screen_height = user32.GetSystemMetrics(1)
+    # Fenster verschieben
+    root.geometry(f"{WIDTH}x{HEIGHT}+{x}+{y}")
 
-    clock = pygame.time.Clock()
-    running = True
+    # Nach 20 ms erneut aufrufen
+    root.after(20, move_window)
 
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+# Hauptfenster einrichten
+root = tk.Tk()
+root.title("Fenster immer im Vordergrund")
 
-        # Fensterposition verändern
-        x += speed_x
-        y += speed_y
+# --> Wichtig: '-topmost' sorgt dafür, dass das Fenster oben bleibt
+root.attributes("-topmost", True)
 
-        # Kollisionsabfrage (linker/rechter Bildschirmrand)
-        if x <= 0 or (x + WIDTH) >= screen_width:
-            speed_x = -speed_x
+# Initiale Position + Größe
+root.geometry(f"{WIDTH}x{HEIGHT}+100+100")
 
-        # Kollisionsabfrage (oberer/unterer Bildschirmrand)
-        if y <= 0 or (y + HEIGHT) >= screen_height:
-            speed_y = -speed_y
+# Label mit Text
+label = tk.Label(root, text="Daniel ", font=("Arial", 50))
+label.pack(expand=True)
 
-        # Fenster mithilfe der Windows-API bewegen
-        ctypes.windll.user32.MoveWindow(hwnd, x, y, WIDTH, HEIGHT, True)
-        
-        # Hintergrund im Fenster füllen
-        screen.fill((0, 0, 0))
-        
-        # Text zeichnen
-        screen.blit(text_surface, text_rect)
-        
-        # Anzeige aktualisieren
-        pygame.display.flip()
-        clock.tick(60)  # 60 Frames pro Sekunde
+# Startet die Bewegung
+root.after(20, move_window)
 
-    pygame.quit()
-    sys.exit()
-
-if __name__ == "__main__":
-    main()
+# Tkinter-Hauptschleife
+root.mainloop()
